@@ -337,13 +337,28 @@ def run_training(epochs, seq_len, lr, ticker_list,
         state["conf_threshold"] = 0.0
 
     if best_model:
-        path = "experiments/best_model"
-        if os.path.exists(path):
-            shutil.rmtree(path)
-        mlflow.pytorch.save_model(best_model, path)
-        state["model_version"] = best_name
-        for row in state["results_table"]:
-            row["best"] = row["model"] == best_name
+        existing_mae = float("inf")
+        try:
+            if os.path.exists("experiments/best_model_meta.txt"):
+                with open("experiments/best_model_meta.txt", "r") as f:
+                    existing_mae = float(f.read().strip())
+        except Exception:
+            pass
+
+        if best_mae < existing_mae:
+            log(f"New model better ({best_mae:.6f} < {existing_mae:.6f}). Saving...")
+            path = "experiments/best_model"
+            if os.path.exists(path):
+                shutil.rmtree(path)
+            mlflow.pytorch.save_model(best_model, path)
+            with open("experiments/best_model_meta.txt", "w") as f:
+                f.write(str(best_mae))
+            state["model_version"] = best_name
+            for row in state["results_table"]:
+                row["best"] = row["model"] == best_name
+        else:
+            log(f"Existing model better ({existing_mae:.6f} <= {best_mae:.6f}). Keeping old model.")
+            state["model_version"] = state["model_version"] or best_name
 
     state["last_retrain"]      = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M")
     state["training"]          = False

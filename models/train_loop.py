@@ -238,8 +238,25 @@ if __name__ == "__main__":
             best_model = model
             best_name  = name
 
-    print(f"\nBest model: {best_name} with MAE {best_mae:.6f}")
-    if os.path.exists("experiments/best_model"):
-        shutil.rmtree("experiments/best_model")
-    mlflow.pytorch.save_model(best_model, "experiments/best_model")
-    print("Saved to experiments/best_model")
+    print(f"\nBest model this run: {best_name} with MAE {best_mae:.6f}")
+
+    # check if existing saved model is better before overwriting
+    existing_mae = float("inf")
+    if os.path.exists("experiments/best_model_meta.txt"):
+        try:
+            with open("experiments/best_model_meta.txt", "r") as f:
+                existing_mae = float(f.read().strip())
+            print(f"Existing saved model MAE: {existing_mae:.6f}")
+        except Exception:
+            pass
+
+    if best_mae < existing_mae:
+        print(f"New model is better ({best_mae:.6f} < {existing_mae:.6f}). Saving...")
+        if os.path.exists("experiments/best_model"):
+            shutil.rmtree("experiments/best_model")
+        mlflow.pytorch.save_model(best_model, "experiments/best_model")
+        with open("experiments/best_model_meta.txt", "w") as f:
+            f.write(str(best_mae))
+        print(f"Saved {best_name} to experiments/best_model")
+    else:
+        print(f"Existing model is better ({existing_mae:.6f} <= {best_mae:.6f}). Keeping old model.")
