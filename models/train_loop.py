@@ -26,6 +26,7 @@ def make_sequences(data: np.ndarray, seq_len: int = 20):
 def train_model(model, X_train, y_train, X_val, y_val,
                 model_name="model", epochs=30, lr=1e-3, batch_size=64):
 
+    mlflow.set_tracking_uri("sqlite:///experiments/mlflow.db")
     mlflow.set_experiment("adaptive-forecaster")
 
     with mlflow.start_run(run_name=model_name):
