@@ -15,7 +15,7 @@ flavors:
     pytorch_version: 2.12.0+cpu
 mlflow_version: 3.13.0
 model_id: null
-model_size_bytes: 221121
-model_uuid: 3a43b773e05040f7a1a8d82bae024e91
+model_size_bytes: 221249
+model_uuid: 805507ceffd34d3481c02af0df94856e
 prompts: null
-utc_time_created: '2026-06-02 21:48:29.398735'
+utc_time_created: '2026-06-02 21:46:28.885017'
